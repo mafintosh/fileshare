@@ -55,7 +55,7 @@ var draw = function(force) {
 	});
 };
 
-if (!filename) {
+if (filename === '--download' || filename === 'download') {
 	var find = function(onurl) {
 		var sock = dgram.createSocket('udp4');
 
