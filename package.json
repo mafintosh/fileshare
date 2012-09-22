@@ -1,0 +1,7 @@
+{
+  "name": "fileshare",
+  "version": "0.1.0",
+  "bin": {
+    "fileshare": "./cli.js"
+  }
+}
