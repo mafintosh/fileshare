@@ -15,7 +15,6 @@ var MULTICAST_ADDRESS = '224.0.0.234';
 var MULTICAST_PORT = 52525;
 
 var transfers = [];
-
 var monitor = function(stream, transfer) {
 	var read = 0;
 	var onend = function() {
@@ -37,7 +36,6 @@ var monitor = function(stream, transfer) {
 
 	transfers.push(transfer);
 };
-
 var drawLast = 0;
 var drawOffset = 0;
 var draw = function(force) {
@@ -57,7 +55,6 @@ var draw = function(force) {
 		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,Math.max(0,width-progress))+'] '+transfer.status);
 	});
 };
-
 var help = function(onanswer) {
 	console.error('\033[22;32musage\033[22;0m \033[22;1mfileshare [filename]\033[22;0m')
 
@@ -84,15 +81,16 @@ var help = function(onanswer) {
 
 };
 
-if (!filename) {
-	help();
-	return;
-}
+if (!filename) return help();
 
 try {
 	stat = fs.statSync(filename);
 } catch (err) {
-	console.error('file does not exist');
+	console.error('\033[22;31mfail\033[22;0m file does not exist');
+	process.exit(1);
+}
+if (stat.isDirectory()) {
+	console.error('\033[22;31mfail\033[22;0m you cannot share a directory');
 	process.exit(1);
 }
 
