@@ -19,6 +19,9 @@ var transfers = [];
 var monitor = function(stream, transfer) {
 	var read = 0;
 	var onend = function() {
+		if (typeof transfer.progress !== 'number') {
+			transfer.progress = 1;
+		}
 		transfer.status = '('+(transfer.progress < 1 ? '\033[22;31mfail\033[22;0m' : '\033[22;32mok\033[22;0m')+')    ';
 		draw(true);
 	};
@@ -51,38 +54,38 @@ var draw = function(force) {
 
 		drawOffset++;
 		start += WHITESPACE.slice(0, Math.max(1,16-start.length));
-		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,width-progress)+'] '+transfer.status);
+		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,Math.max(0,width-progress))+'] '+transfer.status);
 	});
 };
 
-if (filename === 'get') {
-	var find = function(onurl) {
-		var sock = dgram.createSocket('udp4');
+var help = function(onanswer) {
+	console.error('\033[22;32musage\033[22;0m \033[22;1mfileshare [filename]\033[22;0m')
 
-		sock.once('message', function(url) {
-			clearInterval(loop);
-			onurl(url.toString());
-		});
+	var sock = dgram.createSocket('udp4');
+	var all = {};
+	var kill = process.exit.bind(process);
+	var timeout;
 
-		var send = function() {
-			sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);
-		};
-		var loop = setInterval(send, 1000);
-		send();
-	};
+	sock.on('message', function(url) {
+		url = url.toString();
 
-	find(function(url) {
-		http.get(url.split('@')[0], function(resp) {
-			monitor(resp, {
-				address: url.split('@').pop(),
-				length: parseInt(resp.headers['content-length'], 10)
-			});
-			resp.on('end', function() {
-				process.exit(0);
-			});
-			resp.pipe(fs.createWriteStream(url.split('/').pop().replace(/^./, '')));
-		});
+		if (all[url]) return;
+		all[url] = true;
+		console.error('\033[22;32mfound\033[22;0m \033[22;1mcurl -LOC - '+url.split('@')[0]+'\033[22;0m (\033[22;36m'+url.split('@').pop().split('/')[0]+'\033[22;0m)');
+		clearTimeout(timeout);
+		timeout = setTimeout(kill, 1000);
 	});
+
+	var send = function() {
+		sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);
+	};
+	var loop = setInterval(send, 1000);
+	send();
+
+};
+
+if (!filename) {
+	help();
 	return;
 }
 
@@ -171,7 +174,7 @@ server.on('listening', function() {
 	sock.bind(MULTICAST_PORT);
 	sock.addMembership(MULTICAST_ADDRESS);
 
-	console.error('\033[22;32mshare this command:\033[22;0m \033[22;1mcurl -LOC - http://'+addr+':'+port+'/'+name+'\033[22;0m \033[22;32mor\033[22;0m \033[22;1mfileshare get\033[22;0m');
+	console.error('\033[22;32mshare this command:\033[22;0m \033[22;1mcurl -LOC - http://'+addr+':'+port+'/'+name);
 });
 
 server.listen(52525);
