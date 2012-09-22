@@ -1,6 +1,6 @@
 # fileshare
 
-fileshare is a command line tool that lets you share a file on your local network
+fileshare is a command line tool that lets you share and discover files on your local network
 
 its available through npm:
 
