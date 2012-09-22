@@ -4,6 +4,9 @@ var http = require('http');
 var fs = require('fs');
 var os = require('os');
 
+var PROGRESS_BAR = Array(1000).join('=');
+var WHITESPACE = Array(1000).join(' ');
+
 var filename = process.argv[2];
 var stat;
 
@@ -39,9 +42,6 @@ var parseRange = function(header) {
 	result.length = result.end-result.start+1;
 	return result;
 };
-
-var PROGRESS_BAR = Array(1000).join('=');
-var WHITESPACE = Array(1000).join(' ');
 
 var server = http.createServer();
 var transfers = [];
