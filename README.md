@@ -20,3 +20,5 @@ if the transfer fails they can just run it again and curl will resume the transf
 to list all available files on the network do
 
 	$ fileshare
+	$ usage fileshare [filename]
+	$ found curl -LOC - http://192.168.2.199:52525/filename.ext
