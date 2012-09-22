@@ -73,11 +73,11 @@ var help = function(onanswer) {
 		all[url] = true;
 		console.error('\033[22;32mfound\033[22;0m \033[22;1mcurl -LOC - '+url.split('@')[0]+'\033[22;0m (\033[22;36m'+url.split('@').pop().split('/')[0]+'\033[22;0m)');
 		clearTimeout(timeout);
-		timeout = setTimeout(kill, 1000);
 	});
 
 	var send = function() {
 		sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);
+		timeout = setTimeout(kill, 1000);
 	};
 	var loop = setInterval(send, 1000);
 	send();

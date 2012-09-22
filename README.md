@@ -17,6 +17,6 @@ receivers of the file simple need to run the curl command.
 
 if the transfer fails they can just run it again and curl will resume the transfer.
 
-if the receiver install fileshare as well they can simply download a shared file by doing:
+to list all available files on the network do
 
-	$ fileshare get
+	$ fileshare
