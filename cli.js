@@ -50,12 +50,12 @@ var draw = function(force) {
 		var start = transfer.address+'';
 
 		drawOffset++;
-		start += WHITESPACE.slice(0, 16-start.length);
+		start += WHITESPACE.slice(0, Math.max(1,16-start.length));
 		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,width-progress)+'] '+transfer.status);
 	});
 };
 
-if (filename === '--download' || filename === 'download') {
+if (filename === 'get') {
 	var find = function(onurl) {
 		var sock = dgram.createSocket('udp4');
 
@@ -72,17 +72,15 @@ if (filename === '--download' || filename === 'download') {
 	};
 
 	find(function(url) {
-		http.get(url, function(resp) {
-			if (!process.stdout.isTTY) {
-				monitor(resp, {
-					address: url.split('://').pop().split(':')[0],
-					length: parseInt(resp.headers['content-length'], 10)
-				});
-			}
-			resp.pipe(process.stdout);
+		http.get(url.split('@')[0], function(resp) {
+			monitor(resp, {
+				address: url.split('@').pop(),
+				length: parseInt(resp.headers['content-length'], 10)
+			});
 			resp.on('end', function() {
 				process.exit(0);
 			});
+			resp.pipe(fs.createWriteStream(url.split('/').pop().replace(/^./, '')));
 		});
 	});
 	return;
@@ -167,13 +165,13 @@ server.on('listening', function() {
 	var sock = dgram.createSocket('udp4');
 
 	sock.on('message', function(message, rinfo) {
-		var url = new Buffer('http://'+addr+':'+port+'/'+name);
+		var url = new Buffer('http://'+addr+':'+port+'/'+name+'@'+os.hostname()+'/'+name);
 		sock.send(url, 0, url.length, rinfo.port, rinfo.address);
 	});
 	sock.bind(MULTICAST_PORT);
 	sock.addMembership(MULTICAST_ADDRESS);
 
-	console.error('\033[22;32mshare this command:\033[22;0m \033[22;1mcurl -LOC - http://'+addr+':'+port+'/'+name+'\033[22;0m');
+	console.error('\033[22;32mshare this command:\033[22;0m \033[22;1mcurl -LOC - http://'+addr+':'+port+'/'+name+'\033[22;0m \033[22;32mor\033[22;0m \033[22;1mfileshare get\033[22;0m');
 });
 
 server.listen(52525);
