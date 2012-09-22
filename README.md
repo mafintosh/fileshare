@@ -12,4 +12,7 @@ usage is simple:
 	$ share this command: curl -LOC - http://192.168.2.199:52525/filename.ext
 
 receivers of the file simple need to run the curl command.  
+
+	$ curl -LOC - http://192.168.2.199:52525/filename.ext # run this on the receiver to transfer the file	
+
 if the transfer fails they can just run it again and curl will resume the transfer.
