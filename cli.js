@@ -8,7 +8,7 @@ var filename = process.argv[2];
 var stat;
 
 if (!filename) {
-	console.error('filename needed');
+	console.error('usage: fileshare filename');
 	process.exit(1);
 }
 
@@ -52,18 +52,18 @@ var draw = function(force) {
 	var now = Date.now();
 	if (!force && now-drawLast < 500) return;
 	drawLast = now;
+
 	var width = Math.min(process.stderr.columns, 60);
 	process.stderr.moveCursor(0, -drawOffset);
 	drawOffset = 0;
 	transfers.forEach(function(transfer) {
 		var progress = Math.floor(width*transfer.progress);
-		var start = transfer.address+''//+' ('+transfer.status+'): ';
+		var start = transfer.address+'';
 
+		drawOffset++;
 		start += WHITESPACE.slice(0, 16-start.length);
 		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,width-progress)+'] '+transfer.status);
-		drawOffset++;
 	});
-	process.stderr.clearScreenDown();
 };
 
 server.on('request', function(req,res) {
