@@ -3,6 +3,7 @@
 var http = require('http');
 var fs = require('fs');
 var os = require('os');
+var dgram = require('dgram');
 
 var PROGRESS_BAR = Array(1000).join('=');
 var WHITESPACE = Array(1000).join(' ');
@@ -10,9 +11,81 @@ var WHITESPACE = Array(1000).join(' ');
 var filename = process.argv[2];
 var stat;
 
+var MULTICAST_ADDRESS = '224.0.0.234';
+var MULTICAST_PORT = 52525;
+
+var transfers = [];
+
+var monitor = function(stream, transfer) {
+	var read = 0;
+	var onend = function() {
+		transfer.status = '('+(transfer.progress < 1 ? '\033[22;31mfail\033[22;0m' : '\033[22;32mok\033[22;0m')+')    ';
+		draw(true);
+	};
+
+	stream.on('data', function(data) {
+		read += data.length;
+		transfer.progress = read / transfer.length;
+		transfer.status = '(\033[22;36m'+(100*transfer.progress).toFixed(1)+'%\033[22;0m)';
+		draw();
+	});
+	stream.on('end', onend);
+	stream.on('close', onend);
+
+	transfers.push(transfer);
+};
+
+var drawLast = 0;
+var drawOffset = 0;
+var draw = function(force) {
+	var now = Date.now();
+	if (!force && now-drawLast < 500) return;
+	drawLast = now;
+
+	var width = Math.min(process.stderr.columns, 60);
+	process.stderr.moveCursor(0, -drawOffset);
+	drawOffset = 0;
+	transfers.forEach(function(transfer) {
+		var progress = Math.floor(width*transfer.progress);
+		var start = transfer.address+'';
+
+		drawOffset++;
+		start += WHITESPACE.slice(0, 16-start.length);
+		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,width-progress)+'] '+transfer.status);
+	});
+};
+
 if (!filename) {
-	console.error('usage: fileshare filename');
-	process.exit(1);
+	var find = function(onurl) {
+		var sock = dgram.createSocket('udp4');
+
+		sock.once('message', function(url) {
+			clearInterval(loop);
+			onurl(url.toString());
+		});
+
+		var send = function() {
+			sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);
+		};
+		var loop = setInterval(send, 1000);
+		send();
+	};
+
+	find(function(url) {
+		http.get(url, function(resp) {
+			if (!process.stdout.isTTY) {
+				monitor(resp, {
+					address: url.split('://').pop().split(':')[0],
+					length: parseInt(resp.headers['content-length'], 10)
+				});
+			}
+			resp.pipe(process.stdout);
+			resp.on('end', function() {
+				process.exit(0);
+			});
+		});
+	});
+	return;
 }
 
 try {
@@ -44,27 +117,6 @@ var parseRange = function(header) {
 };
 
 var server = http.createServer();
-var transfers = [];
-
-var drawLast = 0;
-var drawOffset = 0;
-var draw = function(force) {
-	var now = Date.now();
-	if (!force && now-drawLast < 500) return;
-	drawLast = now;
-
-	var width = Math.min(process.stderr.columns, 60);
-	process.stderr.moveCursor(0, -drawOffset);
-	drawOffset = 0;
-	transfers.forEach(function(transfer) {
-		var progress = Math.floor(width*transfer.progress);
-		var start = transfer.address+'';
-
-		drawOffset++;
-		start += WHITESPACE.slice(0, 16-start.length);
-		console.error('\033[22;32mget\033[22;0m '+start+'['+PROGRESS_BAR.slice(0,progress)+'>'+WHITESPACE.slice(0,width-progress)+'] '+transfer.status);
-	});
-};
 
 server.on('request', function(req,res) {
 	var range = parseRange(req.headers.range);
@@ -84,29 +136,18 @@ server.on('request', function(req,res) {
 		res.setHeader('Content-Range', 'bytes '+range.start+'-'+range.end+'/'+stat.size);
 	}
 
-	var transfer = {};
 	var stream = fs.createReadStream(filename, range);
-	var read = 0;
 
 	stream.pipe(res);
 
-	transfer.address = req.connection.remoteAddress;
-
-	var onend = function() {
-		transfer.status = '('+(transfer.progress < 1 ? '\033[22;31mfail\033[22;0m' : '\033[22;32mok\033[22;0m')+')    ';
-		draw(true);
-	};
-
-	stream.on('data', function(data) {
-		read += data.length;
-		transfer.progress = read / length;
-		transfer.status = '(\033[22;36m'+(100*transfer.progress).toFixed(1)+'%\033[22;0m)';
-		draw();
+	res.on('close', function() {
+		stream.destroy();
 	});
-	stream.on('end', onend);
-	res.on('close', onend);
 
-	transfers.push(transfer);
+	monitor(stream, {
+		length: length,
+		address: req.connection.remoteAddress
+	});
 });
 server.on('listening', function() {
 	var addr = os.networkInterfaces();
@@ -122,6 +163,15 @@ server.on('listening', function() {
 	var ext = filename.split('.').pop();
 	
 	name = encodeURIComponent(name) === name ? name : Date.now()+'.'+ext;
+
+	var sock = dgram.createSocket('udp4');
+
+	sock.on('message', function(message, rinfo) {
+		var url = new Buffer('http://'+addr+':'+port+'/'+name);
+		sock.send(url, 0, url.length, rinfo.port, rinfo.address);
+	});
+	sock.bind(MULTICAST_PORT);
+	sock.addMembership(MULTICAST_ADDRESS);
 
 	console.error('\033[22;32mshare this command:\033[22;0m \033[22;1mcurl -LOC - http://'+addr+':'+port+'/'+name+'\033[22;0m');
 });

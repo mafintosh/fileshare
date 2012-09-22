@@ -16,3 +16,7 @@ receivers of the file simple need to run the curl command.
 	$ curl -LOC - http://192.168.2.199:52525/filename.ext # run this on the receiver to transfer the file	
 
 if the transfer fails they can just run it again and curl will resume the transfer.
+
+if the receiver has installed fileshare they can simply run
+
+	$ fileshare # wait for someone to share a file
