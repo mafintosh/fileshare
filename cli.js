@@ -34,8 +34,10 @@ var draw = function() {
 	that.clear = function() {
 		lastClear = Date.now();
 		process.stdout.moveCursor(0, -offset);
-		process.stdout.clearScreenDown();
 		offset = 0;
+		process.nextTick(function() {
+			process.stdout.clearScreenDown();
+		});
 	};
 	that.log = function(line) {
 		console.log(line.replace(colorPattern, color).replace(colorPattern, color));
