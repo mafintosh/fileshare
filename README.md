@@ -27,7 +27,7 @@ To list all available files available for download on the network do
 
 Select the file you want using `up` and `down` on your keyboard and click `enter`
 
-## I want to share files on the web!
+## I want to share files on the web?
 
 fileshare only works on the local network.  
 To share files with anyone, anywhere use [Ge.tt](http://ge.tt/)
