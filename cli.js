@@ -120,7 +120,7 @@ var monitor = function() {
 		});
 		options.stream.on('close', function() {
 			if (options.progress === 1) return;
-			options.status = '(@read(fail))';
+			options.status = '(@red(fail))';
 			update(true);
 		});
 		streams.push(options);
