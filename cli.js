@@ -261,6 +261,9 @@ var get = function(file) {
 		res.on('end', function() {
 			setTimeout(process.exit.bind(process, 0), 1000);
 		});
+	}).on('error', function() {
+		draw.line('@red(fail) file could not be downloaded');
+		process.exit(1);
 	});
 };
 var find = function(onfind) {
@@ -306,7 +309,7 @@ cmds.ls = function() {
 		get(file);
 	});
 
-	var wait = setTimeout(function() {
+	var wait = process.argv.indexOf('-w') === -1 && process.argv.indexOf('--wait') === -1 && setTimeout(function() {
 		draw.line('@red(fail) no files found');
 		process.exit(1);
 	}, 1500);
