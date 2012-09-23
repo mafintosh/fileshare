@@ -23,4 +23,4 @@ to list all available files available for download on the network do
 	$ [x] get someone/filename.ext
 	$ [ ] get someone-else/filename.ext
 
-select the file you using using `up` and `down` on your keyboard and click `enter`
+select the file you want using `up` and `down` on your keyboard and click `enter`

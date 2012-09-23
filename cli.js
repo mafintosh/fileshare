@@ -100,7 +100,7 @@ var monitor = function() {
 		if (!force && draw.wait()) return;
 		draw.clear();
 		streams.forEach(function(stream) {
-			var padding = WHITESPACE.slice(0, Math.max(0,20-stream.address.length+4));
+			var padding = WHITESPACE.slice(0, Math.max(0,16-stream.address.length));
 			var progressWidth = Math.floor(stream.progress*40);
 			var progressBar = '['+PROGRESS_BAR.slice(0, progressWidth)+'>'+WHITESPACE.slice(0, 40-progressWidth)+']';
 			draw.line('@green(get) '+stream.address+' '+padding+progressBar+' '+stream.status);
