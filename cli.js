@@ -48,15 +48,11 @@ var draw = function() {
 }();
 
 var choose = function(header, onchoose) {
+	if (!onchoose) return choose(null, header);
+
 	var lines = [];
 	var datas = [];
 	var index = 0;
-
-	if (!onchoose) {
-		onchoose = header;
-		header = null;
-	}
-
 	var update = function() {
 		draw.clear();
 		if (header) {
