@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
+var path = require('path');
 var os = require('os');
 var http = require('http');
 var dgram = require('dgram');
@@ -212,7 +213,7 @@ var put = function(filename) {
 			process.exit(1);
 		}
 
-		var name = filename.split('/').pop();
+		var name = filename.split('/').pop().replace(/ /g, '_').replace(/[,'"\[\]\(\)]/g, '');
 		var ext = filename.split('.').pop();
 		
 		name = encodeURIComponent(name) === name ? name : Date.now()+'.'+ext;
@@ -235,7 +236,7 @@ var put = function(filename) {
 	});
 };
 var get = function(file) {
-	var stat = fs.existsSync(file.filename) && fs.statSync(file.filename);
+	var stat = (fs.existsSync || path.existsSync)(file.filename) && fs.statSync(file.filename);
 	var mon = monitor();
 
 	if (stat && stat.isDirectory())  {
