@@ -17,8 +17,10 @@ receivers of the file simple need to run the curl command.
 
 if the transfer fails they can just run it again and curl will resume the transfer.
 
-to list all available files on the network do
+to list all available files available for download on the network do
 
-	$ fileshare
-	$ usage fileshare [filename]
-	$ found curl -LOC - http://192.168.2.199:52525/filename.ext
+	$ fileshare ls
+	$ [x] get someone/filename.ext
+	$ [ ] get someone-else/filename.ext
+
+select the file you using using `up` and `down` on your keyboard and click `enter`
