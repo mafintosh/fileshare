@@ -6,6 +6,8 @@ Its available through npm:
 
 	npm install -g fileshare
 
+## How do I use it?
+
 Usage is simple:
 
 	$ fileshare filename.ext
@@ -25,5 +27,7 @@ To list all available files available for download on the network do
 
 Select the file you want using `up` and `down` on your keyboard and click `enter`
 
+## I want to share files on the web!
+
 fileshare only works on the local network.  
-To share files with anyone use [Ge.tt](http://ge.tt/)
+To share files with anyone, anywhere use [Ge.tt](http://ge.tt/)
