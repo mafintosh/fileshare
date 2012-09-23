@@ -25,4 +25,5 @@ to list all available files available for download on the network do
 
 select the file you want using `up` and `down` on your keyboard and click `enter`
 
-fileshare only works on the local network. to share files with anyone use [Ge.tt](http://ge.tt/)
+fileshare only works on the local network.  
+to share files with anyone use [Ge.tt](http://ge.tt/)
