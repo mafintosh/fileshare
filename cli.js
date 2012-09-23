@@ -293,17 +293,6 @@ var find = function(onfind) {
 		clearInterval(loop);
 	};
 };
-var help = function() {
-	draw.line('@green(you are running) @bold(fileshare) @green(version) @bold('+require('./package.json').version+')');
-	draw.line('');
-	draw.line('@bold(fileshare [filename]) @green(share a file on the network)');
-	draw.line('@bold(fileshare ls)         @green(list all files on the network)');
-	draw.line('@bold( )                    @green(select one to download it)');
-	draw.line('');
-	process.exit(0);
-};
-
-if (!process.argv[2]) return help();
 
 var cmds = {};
 
@@ -326,5 +315,15 @@ cmds.ls = function() {
 		update('@green(get) '+file.from+file.path, file);
 	});
 };
+cmds.help = function() {
+	draw.line('@green(you are running) @bold(fileshare) @green(version) @bold('+require('./package.json').version+')');
+	draw.line('');
+	draw.line('@bold(fileshare [filename]) @green(share a file on the network)');
+	draw.line('@bold(fileshare ls)         @green(list all files on the network)');
+	draw.line('@bold( )                    @green(select one to download it)');
+	draw.line('');
+	process.exit(0);
+};
 
+if (!process.argv[2]) return cmds.help();
 (cmds[process.argv[2]] || cmds.default)();
