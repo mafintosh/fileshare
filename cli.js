@@ -310,7 +310,7 @@ cmds.ls = function() {
 	});
 
 	var wait = process.argv.indexOf('-w') === -1 && process.argv.indexOf('--wait') === -1 && setTimeout(function() {
-		draw.line('@red(fail) no files found');
+		draw.line('@red(fail) no files found\n@red(fail) use -w to wait until a file has been shared');
 		process.exit(1);
 	}, 1500);
 
