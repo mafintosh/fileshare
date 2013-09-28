@@ -57,7 +57,7 @@ var choose = function(header, onchoose) {
 	var update = function() {
 		draw.clear();
 		if (header) {
-			draw.line(header);		
+			draw.line(header);
 		}
 		lines.forEach(function(line, i) {
 			draw.line('['+(i === index ? '@blue(x)' : ' ')+'] '+line);
@@ -215,7 +215,7 @@ var put = function(filename) {
 
 		var name = filename.split('/').pop().replace(/ /g, '_').replace(/[,'"\[\]\(\)]/g, '');
 		var ext = filename.split('.').pop();
-		
+
 		name = encodeURIComponent(name) === name ? name : Date.now()+'.'+ext;
 
 		var sock = dgram.createSocket('udp4');
@@ -224,8 +224,9 @@ var put = function(filename) {
 			var url = new Buffer('http://'+addr+':'+port+'/'+name+'@'+os.hostname());
 			sock.send(url, 0, url.length, rinfo.port, rinfo.address);
 		});
-		sock.bind(MULTICAST_PORT);
-		sock.addMembership(MULTICAST_ADDRESS);
+		sock.bind(MULTICAST_PORT, function() {
+			sock.addMembership(MULTICAST_ADDRESS);
+		});
 
 		draw.log('@green(share this command:) @bold(curl -LOC - http://'+addr+':'+port+'/'+name+')');
 	});
@@ -286,7 +287,7 @@ var find = function(onfind) {
 	});
 
 	var send = function() {
-		sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);	
+		sock.send(new Buffer('get'), 0, 3, MULTICAST_PORT, MULTICAST_ADDRESS);
 	};
 	var loop = setInterval(send, 1000);
 	send();
